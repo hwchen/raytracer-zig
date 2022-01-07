@@ -14,7 +14,7 @@ pub fn build(b: *std.build.Builder) void {
     const exe = b.addExecutable("raytracer", "src/main.zig");
     exe.setTarget(target);
     exe.setBuildMode(mode);
-    exe.addIncludeDir("/usr/include/SDL2");
+    exe.addIncludeDir("/usr/include");
     exe.linkSystemLibrary("SDL2");
     exe.linkLibC();
     exe.install();
