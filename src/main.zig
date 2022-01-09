@@ -34,22 +34,25 @@ pub fn main() !void {
 
     _ = c.SDL_LockSurface(surface);
 
-    setPixel(surface, 0, 0, 0);
-    //var w: c_int = 0;
-    //var h: c_int = 0;
-    //while (w < window_width) : (w += 1) {
-    //    while (h < window_height) : (h += 1) {
-    //        const r = @intToFloat(f32, w) / @intToFloat(f32, window_width - 1);
-    //        const g = @intToFloat(f32, h) / @intToFloat(f32, window_height - 1);
-    //        const b = 0.25;
-    //        const pixel = rgbToPixel(
-    //            @floatToInt(u32, 255.99 * r),
-    //            @floatToInt(u32, 255.99 * g),
-    //            @floatToInt(u32, 255.99 * b),
-    //        );
-    //        setPixel(surface, w, h, pixel);
-    //    }
-    //}
+    var w: c_int = 0;
+    while (w < window_width) : (w += 1) {
+        var h: c_int = 0;
+        while (h < window_height) : (h += 1) {
+            //const r = @intToFloat(f32, w) / @intToFloat(f32, window_width - 1);
+            //const g = @intToFloat(f32, h) / @intToFloat(f32, window_height - 1);
+            //const b = 0.25;
+            const r = 1.0;
+            const g = 0.0;
+            const b = 0.0;
+            const pixel = rgbToPixel(
+                @floatToInt(u32, 255.99 * r),
+                @floatToInt(u32, 255.99 * g),
+                @floatToInt(u32, 255.99 * b),
+            );
+            std.debug.print("w: {d:03}, h: {d:03}\n", .{ w, h });
+            setPixel(surface, w, h, pixel);
+        }
+    }
 
     c.SDL_UnlockSurface(surface);
 
@@ -85,7 +88,11 @@ fn setPixel(surf: *c.SDL_Surface, x: c_int, y: c_int, pixel: u32) void {
     @intToPtr(*u32, target_pixel).* = pixel;
 }
 
-// TODO figure out how rgb maps to the u32
+// bytes from high to low:
+// - alpha
+// - red
+// - green
+// - blue
 fn rgbToPixel(r: u32, g: u32, b: u32) u32 {
     return 255 << 24 | r << 16 | g << 8 | b;
 }
