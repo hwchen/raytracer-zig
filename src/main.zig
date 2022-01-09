@@ -32,7 +32,9 @@ pub fn main() !void {
 
     // render
 
-    setPixel(surface, 2, 2, 0);
+    _ = c.SDL_LockSurface(surface);
+
+    setPixel(surface, 0, 0, 0);
     //var w: c_int = 0;
     //var h: c_int = 0;
     //while (w < window_width) : (w += 1) {
@@ -48,6 +50,13 @@ pub fn main() !void {
     //        setPixel(surface, w, h, pixel);
     //    }
     //}
+
+    c.SDL_UnlockSurface(surface);
+
+    if (c.SDL_UpdateWindowSurface(window) != 0) {
+        c.SDL_Log("Error updating window surface: %s", c.SDL_GetError());
+        return error.SDLUpdateWindowFailed;
+    }
 
     // Keep window open until receiving quit event
 
