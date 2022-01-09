@@ -34,16 +34,13 @@ pub fn main() !void {
 
     _ = c.SDL_LockSurface(surface);
 
-    var w: c_int = 0;
-    while (w < window_width) : (w += 1) {
-        var h: c_int = 0;
-        while (h < window_height) : (h += 1) {
-            //const r = @intToFloat(f32, w) / @intToFloat(f32, window_width - 1);
-            //const g = @intToFloat(f32, h) / @intToFloat(f32, window_height - 1);
-            //const b = 0.25;
-            const r = 1.0;
-            const g = 0.0;
-            const b = 0.0;
+    var h: c_int = 0;
+    while (h < window_height) : (h += 1) {
+        var w: c_int = 0;
+        while (w < window_width) : (w += 1) {
+            const r = @intToFloat(f32, w) / @intToFloat(f32, window_width - 1);
+            const g = @intToFloat(f32, window_height - h) / @intToFloat(f32, window_height - 1);
+            const b = 0.25;
             const pixel = rgbToPixel(
                 @floatToInt(u32, 255.99 * r),
                 @floatToInt(u32, 255.99 * g),
