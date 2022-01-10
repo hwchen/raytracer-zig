@@ -37,7 +37,7 @@ pub const Vec3 = struct {
         };
     }
 
-    pub fn unit_vector(self: Self) Self {
+    pub fn unitVector(self: Self) Self {
         const inv_length = 1 / self.length();
         return Self{
             .x = self.x * inv_length,
@@ -54,11 +54,28 @@ pub const Vec3 = struct {
         };
     }
 
+    pub fn sub(u: Self, v: Self) Self {
+        return Self{
+            .x = u.x - v.x,
+            .y = u.y - v.y,
+            .z = u.z - v.z,
+        };
+    }
+
     pub fn scalarMul(self: Self, t: f32) Self {
         return Self{
             .x = self.x * t,
             .y = self.y * t,
             .z = self.z * t,
+        };
+    }
+
+    pub fn scalarDiv(self: Self, t: f32) Self {
+        const inv_t = 1 / t;
+        return Self{
+            .x = self.x * inv_t,
+            .y = self.y * inv_t,
+            .z = self.z * inv_t,
         };
     }
 };
