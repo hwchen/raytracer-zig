@@ -5,6 +5,7 @@ const c = @cImport({
 const col = @import("./color.zig");
 const Color = col.Color;
 const colorToPixel = col.colorToPixel;
+const ray = @import("./ray.zig");
 
 const SDL_WINDOWPOS_UNDEFINED = @bitCast(c_int, c.SDL_WINDOWPOS_UNDEFINED_MASK);
 
@@ -83,4 +84,8 @@ fn setPixel(surf: *c.SDL_Surface, x: c_int, y: c_int, pixel: u32) void {
         @intCast(usize, y) * @intCast(usize, surf.pitch) +
         @intCast(usize, x) * 4;
     @intToPtr(*u32, target_pixel).* = pixel;
+}
+
+test {
+    std.testing.refAllDecls(@This());
 }

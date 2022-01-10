@@ -45,6 +45,22 @@ pub const Vec3 = struct {
             .z = self.z * inv_length,
         };
     }
+
+    pub fn add(u: Self, v: Self) Self {
+        return Self{
+            .x = u.x + v.x,
+            .y = u.y + v.y,
+            .z = u.z + v.z,
+        };
+    }
+
+    pub fn scalarMul(self: Self, t: f32) Self {
+        return Self{
+            .x = self.x * t,
+            .y = self.y * t,
+            .z = self.z * t,
+        };
+    }
 };
 
 pub const Point3 = Vec3;
