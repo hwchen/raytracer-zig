@@ -2,6 +2,9 @@ const std = @import("std");
 const c = @cImport({
     @cInclude("SDL2/SDL.h");
 });
+const col = @import("./color.zig");
+const Color = col.Color;
+const colorToPixel = col.colorToPixel;
 
 const SDL_WINDOWPOS_UNDEFINED = @bitCast(c_int, c.SDL_WINDOWPOS_UNDEFINED_MASK);
 
@@ -38,15 +41,12 @@ pub fn main() !void {
     while (h < window_height) : (h += 1) {
         var w: c_int = 0;
         while (w < window_width) : (w += 1) {
-            const r = @intToFloat(f32, w) / @intToFloat(f32, window_width - 1);
-            const g = @intToFloat(f32, window_height - h) / @intToFloat(f32, window_height - 1);
-            const b = 0.25;
-            const pixel = rgbToPixel(
-                @floatToInt(u32, 255.99 * r),
-                @floatToInt(u32, 255.99 * g),
-                @floatToInt(u32, 255.99 * b),
+            const color = Color.new(
+                @intToFloat(f32, w) / @intToFloat(f32, window_width - 1),
+                @intToFloat(f32, window_height - h) / @intToFloat(f32, window_height - 1),
+                0.25,
             );
-            std.debug.print("w: {d:03}, h: {d:03}\n", .{ w, h });
+            const pixel = colorToPixel(color);
             setPixel(surface, w, h, pixel);
         }
     }
@@ -83,13 +83,4 @@ fn setPixel(surf: *c.SDL_Surface, x: c_int, y: c_int, pixel: u32) void {
         @intCast(usize, y) * @intCast(usize, surf.pitch) +
         @intCast(usize, x) * 4;
     @intToPtr(*u32, target_pixel).* = pixel;
-}
-
-// bytes from high to low:
-// - alpha
-// - red
-// - green
-// - blue
-fn rgbToPixel(r: u32, g: u32, b: u32) u32 {
-    return 255 << 24 | r << 16 | g << 8 | b;
 }
