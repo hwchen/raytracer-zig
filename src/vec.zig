@@ -5,12 +5,15 @@ pub fn vec3(x: f32, y: f32, z: f32) Vec3 {
     return .{ x, y, z, 0.0 };
 }
 
-pub const dot = zmath.dot3;
 pub const cross = zmath.cross3;
 pub const lengthSq = zmath.lengthSq3;
 pub const length = zmath.length3;
 pub const mul = zmath.mul;
 pub const unitVector = zmath.normalize3;
+/// Not sure why zmath returns dot product as a vector
+pub fn dot(v0: Vec3, v1: Vec3) f32 {
+    return zmath.dot3(v0, v1)[0];
+}
 
 pub const point = struct {
     pub const Point3 = Vec3;
