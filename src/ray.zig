@@ -1,5 +1,5 @@
 const vec = @import("./vec.zig");
-const Point3 = vec.Point3;
+const Point3 = vec.point.Point3;
 const Vec3 = vec.Vec3;
 
 pub const Ray = struct {

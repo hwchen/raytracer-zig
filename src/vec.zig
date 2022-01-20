@@ -1,83 +1,49 @@
-pub const Vec3 = struct {
-    x: f32,
-    y: f32,
-    z: f32,
+const zmath = @import("./lib/zmath.zig");
 
-    const Self = @This();
+pub const Vec3 = zmath.F32x4;
+pub fn vec3(x: f32, y: f32, z: f32) Vec3 {
+    return .{ x, y, z, 0.0 };
+}
 
-    pub fn new(x: f32, y: f32, z: f32) Self {
-        return Self{
-            .x = x,
-            .y = y,
-            .z = z,
-        };
+pub const dot = zmath.dot3;
+pub const cross = zmath.cross3;
+pub const lengthSq = zmath.lengthSq3;
+pub const length = zmath.length3;
+pub const mul = zmath.mul;
+pub const unitVector = zmath.normalize3;
+
+pub const point = struct {
+    pub const Point3 = Vec3;
+    // x, y, z
+    pub const point3 = vec3;
+
+    pub fn x(p: Point3) f32 {
+        return p[0];
     }
 
-    pub fn length(self: Self) f32 {
-        return @sqrt(self.length_square());
+    pub fn y(p: Point3) f32 {
+        return p[1];
     }
 
-    pub fn length_square(self: Self) f32 {
-        return self.x * self.x +
-            self.y * self.y +
-            self.z * self.z;
-    }
-
-    pub fn dot(u: Self, v: Self) f32 {
-        return u.x * v.x +
-            u.y * v.y +
-            u.z * v.z;
-    }
-
-    pub fn cross(u: Self, v: Self) Self {
-        return Self{
-            .x = u.y * v.z - u.z * v.y,
-            .y = u.z * v.x - u.x * v.z,
-            .z = u.x * v.y - u.y * v.x,
-        };
-    }
-
-    pub fn unitVector(self: Self) Self {
-        const inv_length = 1 / self.length();
-        return Self{
-            .x = self.x * inv_length,
-            .y = self.y * inv_length,
-            .z = self.z * inv_length,
-        };
-    }
-
-    pub fn add(u: Self, v: Self) Self {
-        return Self{
-            .x = u.x + v.x,
-            .y = u.y + v.y,
-            .z = u.z + v.z,
-        };
-    }
-
-    pub fn sub(u: Self, v: Self) Self {
-        return Self{
-            .x = u.x - v.x,
-            .y = u.y - v.y,
-            .z = u.z - v.z,
-        };
-    }
-
-    pub fn scalarMul(self: Self, t: f32) Self {
-        return Self{
-            .x = self.x * t,
-            .y = self.y * t,
-            .z = self.z * t,
-        };
-    }
-
-    pub fn scalarDiv(self: Self, t: f32) Self {
-        const inv_t = 1 / t;
-        return Self{
-            .x = self.x * inv_t,
-            .y = self.y * inv_t,
-            .z = self.z * inv_t,
-        };
+    pub fn z(p: Point3) f32 {
+        return p[2];
     }
 };
 
-pub const Point3 = Vec3;
+pub const color = struct {
+    pub const Color = Vec3;
+    // r, g, b
+    pub const color = vec3;
+
+    // bytes from high to low:
+    // - alpha
+    // - red
+    // - green
+    // - blue
+    pub fn colorToPixel(col: Color) u32 {
+        const r = @floatToInt(u32, 255.99 * col[0]);
+        const g = @floatToInt(u32, 255.99 * col[1]);
+        const b = @floatToInt(u32, 255.99 * col[2]);
+        return 255 << 24 | r << 16 | g << 8 | b;
+    }
+};
