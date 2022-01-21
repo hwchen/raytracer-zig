@@ -1,3 +1,4 @@
+const std = @import("std");
 const zmath = @import("./lib/zmath.zig");
 
 pub const Vec3 = zmath.F32x4;
@@ -6,13 +7,17 @@ pub fn vec3(x: f32, y: f32, z: f32) Vec3 {
 }
 
 pub const cross = zmath.cross3;
-pub const lengthSq = zmath.lengthSq3;
-pub const length = zmath.length3;
 pub const mul = zmath.mul;
 pub const unitVector = zmath.normalize3;
 /// Not sure why zmath returns dot product as a vector
-pub fn dot(v0: Vec3, v1: Vec3) f32 {
+pub inline fn dot(v0: Vec3, v1: Vec3) f32 {
     return zmath.dot3(v0, v1)[0];
+}
+pub inline fn lengthSq(v: Vec3) f32 {
+    return dot(v, v);
+}
+pub inline fn length(v: Vec3) f32 {
+    return std.math.sqrt(dot(v, v));
 }
 
 pub const point = struct {

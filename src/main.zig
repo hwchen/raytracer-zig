@@ -125,14 +125,14 @@ fn setPixel(surf: *c.SDL_Surface, x: c_int, y: c_int, pixel: u32) void {
 
 fn hitSphere(center: Point3, radius: f32, r: Ray) ?f32 {
     const oc = r.origin - center;
-    const a = dot(r.direction, r.direction);
-    const b = 2.0 * dot(oc, r.direction);
-    const _c = dot(oc, oc) - radius * radius;
-    const discriminant = b * b - 4.0 * a * _c;
+    const a = vec.lengthSq(r.direction);
+    const half_b = dot(oc, r.direction);
+    const _c = vec.lengthSq(oc) - radius * radius;
+    const discriminant = half_b * half_b - a * _c;
     if (discriminant < 0) {
         return null;
     } else {
-        return (-b - std.math.sqrt(discriminant)) / (2.0 * a);
+        return (-half_b - std.math.sqrt(discriminant)) / a;
     }
 }
 
