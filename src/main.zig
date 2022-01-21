@@ -8,6 +8,7 @@ const vec = @import("./vec.zig");
 const dot = vec.dot;
 const mul = vec.mul;
 const Vec3 = vec.Vec3;
+const vec3 = vec.vec3;
 const point = vec.point;
 const point3 = point.point3;
 const Point3 = point.Point3;
@@ -122,22 +123,28 @@ fn setPixel(surf: *c.SDL_Surface, x: c_int, y: c_int, pixel: u32) void {
     @intToPtr(*u32, target_pixel).* = pixel;
 }
 
-fn hitSphere(center: Point3, radius: f32, r: Ray) bool {
+fn hitSphere(center: Point3, radius: f32, r: Ray) ?f32 {
     const oc = r.origin - center;
     const a = dot(r.direction, r.direction);
     const b = 2.0 * dot(oc, r.direction);
     const _c = dot(oc, oc) - radius * radius;
     const discriminant = b * b - 4.0 * a * _c;
-    return discriminant > 0;
+    if (discriminant < 0) {
+        return null;
+    } else {
+        return (-b - std.math.sqrt(discriminant)) / (2.0 * a);
+    }
 }
 
 fn rayColor(r: Ray) Color {
-    if (hitSphere(point3(0.0, 0.0, -1.0), 0.5, r)) {
-        return color(1.0, 0.0, 0.0);
+    if (hitSphere(point3(0.0, 0.0, -1.0), 0.5, r)) |t| {
+        const n = vec.unitVector(r.at(t)) - vec3(0.0, 0.0, -1.0);
+        return mul(@as(f32, 0.5), color(point.x(n) + 1.0, point.y(n) + 1.0, point.z(n) + 1.0));
+    } else {
+        const unit_direction = vec.unitVector(r.direction);
+        const t = 0.5 * (point.y(unit_direction) + 1.0);
+        return mul(1.0 - t, color(1.0, 1.0, 1.0)) + mul(t, color(0.5, 0.7, 1.0));
     }
-    const unit_direction = vec.unitVector(r.direction);
-    const t = 0.5 * (point.y(unit_direction) + 1.0);
-    return mul(1.0 - t, color(1.0, 1.0, 1.0)) + mul(t, color(0.5, 0.7, 1.0));
 }
 
 test {

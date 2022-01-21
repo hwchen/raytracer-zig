@@ -16,7 +16,7 @@ pub const Ray = struct {
     }
 
     pub fn at(self: Self, t: f32) Point3 {
-        return self.origin.add(self.direction.scalarMul(t));
+        return self.origin + vec.mul(t, self.direction);
     }
 };
 
