@@ -17,6 +17,9 @@ const color = col.color;
 const Color = col.Color;
 const colorToPixel = col.colorToPixel;
 
+const hit = @import("./hit.zig");
+const Sphere = hit.Sphere;
+
 const SDL_WINDOWPOS_UNDEFINED = @bitCast(c_int, c.SDL_WINDOWPOS_UNDEFINED_MASK);
 
 // Image constants
@@ -123,22 +126,14 @@ fn setPixel(surf: *c.SDL_Surface, x: c_int, y: c_int, pixel: u32) void {
     @intToPtr(*u32, target_pixel).* = pixel;
 }
 
-fn hitSphere(center: Point3, radius: f32, r: Ray) ?f32 {
-    const oc = r.origin - center;
-    const a = vec.lengthSq(r.direction);
-    const half_b = dot(oc, r.direction);
-    const _c = vec.lengthSq(oc) - radius * radius;
-    const discriminant = half_b * half_b - a * _c;
-    if (discriminant < 0) {
-        return null;
-    } else {
-        return (-half_b - std.math.sqrt(discriminant)) / a;
-    }
-}
-
 fn rayColor(r: Ray) Color {
-    if (hitSphere(point3(0.0, 0.0, -1.0), 0.5, r)) |t| {
-        const n = vec.unitVector(r.at(t)) - vec3(0.0, 0.0, -1.0);
+    const sphere = Sphere{
+        .center = point3(0.0, 0.0, -1.0),
+        .radius = 0.5,
+    };
+
+    if (sphere.hit(r, 0.0, std.math.inf(f32))) |hit_record| {
+        const n = hit_record.normal;
         return mul(@as(f32, 0.5), color(point.x(n) + 1.0, point.y(n) + 1.0, point.z(n) + 1.0));
     } else {
         const unit_direction = vec.unitVector(r.direction);
