@@ -1,4 +1,5 @@
 const std = @import("std");
+const math = std.math;
 const c = @cImport({
     @cInclude("SDL2/SDL.h");
 });
@@ -18,7 +19,8 @@ const Color = col.Color;
 const colorToPixel = col.colorToPixel;
 
 const hit = @import("./hit.zig");
-const Sphere = hit.Sphere;
+const Hittable = hit.Hittable;
+const World = hit.World;
 
 const SDL_WINDOWPOS_UNDEFINED = @bitCast(c_int, c.SDL_WINDOWPOS_UNDEFINED_MASK);
 
@@ -66,6 +68,23 @@ pub fn main() !void {
         return error.SDLInitializationFailed;
     };
 
+    // World setup
+
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
+    var world = World.init(allocator);
+    defer world.deinit();
+    try world.add(Hittable{ .sphere = .{
+        .center = point3(0.0, 0.0, -1.0),
+        .radius = 0.5,
+    } });
+    try world.add(Hittable{ .sphere = .{
+        .center = point3(0.0, -100.5, -1.0),
+        .radius = 100,
+    } });
+
     // render
 
     _ = c.SDL_LockSurface(surface);
@@ -86,7 +105,7 @@ pub fn main() !void {
                 - origin);
             // zig fmt: on
 
-            const pixel_color = rayColor(r);
+            const pixel_color = rayColor(r, world);
             const pixel = colorToPixel(pixel_color);
             setPixel(surface, w, h, pixel);
         }
@@ -126,20 +145,18 @@ fn setPixel(surf: *c.SDL_Surface, x: c_int, y: c_int, pixel: u32) void {
     @intToPtr(*u32, target_pixel).* = pixel;
 }
 
-fn rayColor(r: Ray) Color {
-    const sphere = Sphere{
-        .center = point3(0.0, 0.0, -1.0),
-        .radius = 0.5,
-    };
-
-    if (sphere.hit(r, 0.0, std.math.inf(f32))) |hit_record| {
-        const n = hit_record.normal;
-        return mul(@as(f32, 0.5), color(point.x(n) + 1.0, point.y(n) + 1.0, point.z(n) + 1.0));
+fn rayColor(r: Ray, world: World) Color {
+    if (world.hit(r, 0.0, std.math.inf(f32))) |hit_record| {
+        return mul(@as(f32, 0.5), hit_record.normal + color(1.0, 1.0, 1.0));
     } else {
         const unit_direction = vec.unitVector(r.direction);
         const t = 0.5 * (point.y(unit_direction) + 1.0);
         return mul(1.0 - t, color(1.0, 1.0, 1.0)) + mul(t, color(0.5, 0.7, 1.0));
     }
+}
+
+inline fn degrees_to_radians(degrees: f32) f32 {
+    return degrees * math.pi / 180.0;
 }
 
 test {

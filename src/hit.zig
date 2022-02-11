@@ -1,4 +1,7 @@
 const std = @import("std");
+const Allocator = std.mem.Allocator;
+const ArrayList = std.ArrayList;
+
 const vec = @import("./vec.zig");
 const dot = vec.dot;
 const mul = vec.mul;
@@ -23,14 +26,13 @@ pub const HitRecord = struct {
 };
 
 pub const Hittable = union(enum) {
-    Sphere: Sphere,
+    sphere: Sphere,
 
     const Self = @This();
 
     pub fn hit(self: Self, r: Ray, t_min: f32, t_max: f32) ?HitRecord {
         switch (self) {
-            .Sphere => |sphere| return sphere.hit(r, t_min, t_max),
-            else => return null,
+            .sphere => |sphere| return sphere.hit(r, t_min, t_max),
         }
     }
 };
@@ -67,7 +69,7 @@ pub const Sphere = struct {
                 .t = root,
                 .p = p,
                 // ugly to set this directly first,
-                // todo set a constructor for HitRecord
+                // todo maybe set a constructor for HitRecord
                 .normal = undefined,
                 .front_face = undefined,
             };
@@ -75,5 +77,53 @@ pub const Sphere = struct {
             hit_record.setFaceNormal(r, outward_normal);
             return hit_record;
         }
+    }
+};
+
+// Unlike in the book, we don't implement a Hittable trait, we just implement
+// a method to call.
+pub const World = struct {
+    hittable: ArrayList(Hittable),
+
+    const Self = @This();
+
+    pub fn init(alloc: Allocator) Self {
+        return Self{
+            .hittable = ArrayList(Hittable).init(alloc),
+        };
+    }
+
+    pub fn deinit(self: Self) void {
+        self.hittable.deinit();
+    }
+
+    pub fn add(self: *Self, hittable: Hittable) !void {
+        try self.hittable.append(hittable);
+    }
+
+    pub fn clear(self: *Self) void {
+        self.hittable.clearRetainingCapacity();
+    }
+
+    // For the ray, check whether it hits any of the hittables.
+    // If it does, update the result HitRecord if it's closer than the
+    // current result
+    pub fn hit(self: Self, r: Ray, t_min: f32, t_max: f32) ?HitRecord {
+        // the interval tmin -> tmax controls whether or not a hit is
+        // "counted". In order to get the closest hit in the interval,
+        // `closest_so_far` keeps track of the max side of the interval,
+        // and shrinks the interval any time another candidate hit is
+        // found.
+        var closest_so_far = t_max;
+        var res: ?HitRecord = null;
+
+        for (self.hittable.items) |hittable| {
+            if (hittable.hit(r, t_min, closest_so_far)) |hit_record| {
+                closest_so_far = hit_record.t;
+                res = hit_record;
+            }
+        }
+
+        return res;
     }
 };
