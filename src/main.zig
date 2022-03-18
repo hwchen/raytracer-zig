@@ -5,6 +5,7 @@ const c = @cImport({
 });
 const ray = @import("./ray.zig");
 const Ray = ray.Ray;
+
 const vec = @import("./vec.zig");
 const dot = vec.dot;
 const mul = vec.mul;
@@ -22,32 +23,15 @@ const hit = @import("./hit.zig");
 const Hittable = hit.Hittable;
 const World = hit.World;
 
-const SDL_WINDOWPOS_UNDEFINED = @bitCast(c_int, c.SDL_WINDOWPOS_UNDEFINED_MASK);
+const Camera = @import("./Camera.zig");
 
 // Image constants
-
-const aspect_ratio: f32 = 16.0 / 9.0;
 const window_width: c_int = 400;
-const window_height: c_int = @floatToInt(c_int, @intToFloat(f32, window_width) / aspect_ratio);
+const window_height: c_int = @floatToInt(c_int, @intToFloat(f32, window_width) / Camera.aspect_ratio);
 
-// Camera constants
-
-const viewport_height: f32 = 2.0;
-const viewport_width: f32 = aspect_ratio * viewport_height;
-const focal_length: f32 = 1.0;
-const origin = point3(0.0, 0.0, 0.0);
-const horizontal = point3(viewport_width, 0.0, 0.0);
-const vertical = point3(0.0, viewport_height, 0.0);
-
-// zig fmt: off
-const lower_left_corner = origin
-    - mul(@as(f32, 0.5), horizontal)
-    - mul(@as(f32, 0.5), vertical)
-    - point3(0.0, 0.0, focal_length);
-// zig fmt: on
+const SDL_WINDOWPOS_UNDEFINED = @bitCast(c_int, c.SDL_WINDOWPOS_UNDEFINED_MASK);
 
 pub fn main() !void {
-
     // SDL Setup
 
     if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
@@ -96,14 +80,7 @@ pub fn main() !void {
             const u = @intToFloat(f32, w) / @intToFloat(f32, window_width - 1);
             const v = @intToFloat(f32, window_height - h) / @intToFloat(f32, window_height - 1);
 
-            // TODO check why subtract origin?
-            // zig fmt: off
-            const r = Ray.new(origin,
-                lower_left_corner
-                + mul(u, horizontal)
-                + mul(v, vertical)
-                - origin);
-            // zig fmt: on
+            const r = Camera.getRay(u, v);
 
             const pixel_color = rayColor(r, world);
             const pixel = colorToPixel(pixel_color);
@@ -153,10 +130,6 @@ fn rayColor(r: Ray, world: World) Color {
         const t = 0.5 * (point.y(unit_direction) + 1.0);
         return mul(1.0 - t, color(1.0, 1.0, 1.0)) + mul(t, color(0.5, 0.7, 1.0));
     }
-}
-
-inline fn degrees_to_radians(degrees: f32) f32 {
-    return degrees * math.pi / 180.0;
 }
 
 test {
