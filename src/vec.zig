@@ -1,4 +1,5 @@
 const std = @import("std");
+const clamp = std.math.clamp;
 const zmath = @import("./lib/zmath.zig");
 
 pub const Vec3 = zmath.F32x4;
@@ -25,15 +26,15 @@ pub const point = struct {
     // x, y, z
     pub const point3 = vec3;
 
-    pub fn x(p: Point3) f32 {
+    pub inline fn x(p: Point3) f32 {
         return p[0];
     }
 
-    pub fn y(p: Point3) f32 {
+    pub inline fn y(p: Point3) f32 {
         return p[1];
     }
 
-    pub fn z(p: Point3) f32 {
+    pub inline fn z(p: Point3) f32 {
         return p[2];
     }
 };
@@ -48,10 +49,16 @@ pub const color = struct {
     // - red
     // - green
     // - blue
-    pub fn colorToPixel(col: Color) u32 {
-        const r = @floatToInt(u32, 255.99 * col[0]);
-        const g = @floatToInt(u32, 255.99 * col[1]);
-        const b = @floatToInt(u32, 255.99 * col[2]);
+    pub fn colorToPixel(col: Color, samples_per_pixel: usize) u32 {
+        const scale = 1.09 / @intToFloat(f32, samples_per_pixel);
+        const r_scaled = col[0] * scale;
+        const g_scaled = col[1] * scale;
+        const b_scaled = col[2] * scale;
+
+        const r = @floatToInt(u32, 256 * clamp(r_scaled, 0.0, 0.999));
+        const g = @floatToInt(u32, 256 * clamp(g_scaled, 0.0, 0.999));
+        const b = @floatToInt(u32, 256 * clamp(b_scaled, 0.0, 0.999));
+
         return 255 << 24 | r << 16 | g << 8 | b;
     }
 };

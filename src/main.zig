@@ -1,5 +1,6 @@
 const std = @import("std");
 const math = std.math;
+const rand = std.crypto.random;
 const c = @cImport({
     @cInclude("SDL2/SDL.h");
 });
@@ -28,6 +29,7 @@ const Camera = @import("./Camera.zig");
 // Image constants
 const window_width: c_int = 400;
 const window_height: c_int = @floatToInt(c_int, @intToFloat(f32, window_width) / Camera.aspect_ratio);
+const samples_per_pixel: usize = 100;
 
 const SDL_WINDOWPOS_UNDEFINED = @bitCast(c_int, c.SDL_WINDOWPOS_UNDEFINED_MASK);
 
@@ -77,13 +79,18 @@ pub fn main() !void {
     while (h < window_height) : (h += 1) {
         var w: c_int = 0;
         while (w < window_width) : (w += 1) {
-            const u = @intToFloat(f32, w) / @intToFloat(f32, window_width - 1);
-            const v = @intToFloat(f32, window_height - h) / @intToFloat(f32, window_height - 1);
+            var pixel_color = color(0.0, 0.0, 0.0);
+            var s: usize = 0;
+            while (s < samples_per_pixel) : (s += 1) {
+                const u = (@intToFloat(f32, w) + rand.float(f32)) / @intToFloat(f32, window_width - 1);
+                const v = (@intToFloat(f32, window_height - h) + rand.float(f32)) / @intToFloat(f32, window_height - 1);
 
-            const r = Camera.getRay(u, v);
+                const r = Camera.getRay(u, v);
 
-            const pixel_color = rayColor(r, world);
-            const pixel = colorToPixel(pixel_color);
+                pixel_color += rayColor(r, world);
+            }
+            // note: clamp occurs w/ing colorToPixel
+            const pixel = colorToPixel(pixel_color, samples_per_pixel);
             setPixel(surface, w, h, pixel);
         }
     }

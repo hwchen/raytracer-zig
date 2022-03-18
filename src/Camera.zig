@@ -49,11 +49,6 @@ pub fn getRay(u: f32, v: f32) Ray {
 
 // utilities for camera ============================
 
-inline fn random_double() f32 {
-    // returns a random real in [0,1)
-    return rand.float(f32);
-}
-
 inline fn random_double_bounded(min: f32, max: f32) f32 {
     // returns a random real in [min,max)
     return min + (max - min) * rand.float(32);
