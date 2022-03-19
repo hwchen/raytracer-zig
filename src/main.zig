@@ -137,7 +137,7 @@ fn rayColor(r: Ray, world: World, depth: usize) Color {
     }
 
     if (world.hit(r, 0.001, std.math.inf(f32))) |rec| {
-        const target = rec.p + rec.normal + randomInUnitSphere();
+        const target = rec.p + rec.normal + randomUnitVector();
         return mul(@as(f32, 0.5), rayColor(Ray.new(rec.p, target - rec.p), world, depth - 1));
     } else {
         const unit_direction = vec.unitVector(r.direction);
@@ -161,6 +161,10 @@ inline fn randomInUnitSphere() Vec3 {
         if (vec.lengthSq(p) >= 1) continue;
         return p;
     }
+}
+
+inline fn randomUnitVector() Vec3 {
+    return vec.unitVector(randomInUnitSphere());
 }
 
 test {
