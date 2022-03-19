@@ -51,9 +51,9 @@ pub const color = struct {
     // - blue
     pub fn colorToPixel(col: Color, samples_per_pixel: usize) u32 {
         const scale = 1.09 / @intToFloat(f32, samples_per_pixel);
-        const r_scaled = col[0] * scale;
-        const g_scaled = col[1] * scale;
-        const b_scaled = col[2] * scale;
+        const r_scaled = std.math.sqrt(col[0] * scale);
+        const g_scaled = std.math.sqrt(col[1] * scale);
+        const b_scaled = std.math.sqrt(col[2] * scale);
 
         const r = @floatToInt(u32, 256 * clamp(r_scaled, 0.0, 0.999));
         const g = @floatToInt(u32, 256 * clamp(g_scaled, 0.0, 0.999));
