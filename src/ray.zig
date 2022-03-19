@@ -25,8 +25,8 @@ const testing = @import("std").testing;
 
 test "ray at" {
     const r = Ray.new(
-        Point3.new(0.0, 0.0, 0.0),
-        Vec3.new(0.0, 0.0, 0.0),
+        vec.point.point3(0.0, 0.0, 0.0),
+        vec.vec3(0.0, 0.0, 0.0),
     );
-    try testing.expectEqual(Point3.new(0.0, 0.0, 0.0), r.at(0.0));
+    try testing.expectEqual(vec.point.point3(0.0, 0.0, 0.0), r.at(0.0));
 }
