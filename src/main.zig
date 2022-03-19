@@ -30,6 +30,7 @@ const Camera = @import("./Camera.zig");
 const window_width: c_int = 400;
 const window_height: c_int = @floatToInt(c_int, @intToFloat(f32, window_width) / Camera.aspect_ratio);
 const samples_per_pixel: usize = 100;
+const max_depth: usize = 50;
 
 const SDL_WINDOWPOS_UNDEFINED = @bitCast(c_int, c.SDL_WINDOWPOS_UNDEFINED_MASK);
 
@@ -87,7 +88,7 @@ pub fn main() !void {
 
                 const r = Camera.getRay(u, v);
 
-                pixel_color += rayColor(r, world);
+                pixel_color += rayColor(r, world, max_depth);
             }
             // note: clamp occurs w/ing colorToPixel
             const pixel = colorToPixel(pixel_color, samples_per_pixel);
@@ -129,13 +130,36 @@ fn setPixel(surf: *c.SDL_Surface, x: c_int, y: c_int, pixel: u32) void {
     @intToPtr(*u32, target_pixel).* = pixel;
 }
 
-fn rayColor(r: Ray, world: World) Color {
-    if (world.hit(r, 0.0, std.math.inf(f32))) |hit_record| {
-        return mul(@as(f32, 0.5), hit_record.normal + color(1.0, 1.0, 1.0));
+fn rayColor(r: Ray, world: World, depth: usize) Color {
+    // If we've exceeded the ray bounce limit, no more light gathered
+    if (depth <= 0) {
+        return color(0.0, 0.0, 0.0);
+    }
+
+    if (world.hit(r, 0.0, std.math.inf(f32))) |rec| {
+        const target = rec.p + rec.normal + randomInUnitSphere();
+        return mul(@as(f32, 0.5), rayColor(Ray.new(rec.p, target - rec.p), world, depth - 1));
     } else {
         const unit_direction = vec.unitVector(r.direction);
         const t = 0.5 * (point.y(unit_direction) + 1.0);
         return mul(1.0 - t, color(1.0, 1.0, 1.0)) + mul(t, color(0.5, 0.7, 1.0));
+    }
+}
+
+inline fn randomDoubleBounded(min: f32, max: f32) f32 {
+    // returns a random real in [min,max)
+    return min + (max - min) * rand.float(f32);
+}
+
+inline fn randomVec3Bounded(min: f32, max: f32) Vec3 {
+    return vec3(randomDoubleBounded(min, max), randomDoubleBounded(min, max), randomDoubleBounded(min, max));
+}
+
+inline fn randomInUnitSphere() Vec3 {
+    while (true) {
+        const p = randomVec3Bounded(-1.0, 1.0);
+        if (vec.lengthSq(p) >= 1) continue;
+        return p;
     }
 }
 

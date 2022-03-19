@@ -1,5 +1,4 @@
 const std = @import("std");
-const rand = std.crypto.random;
 
 const ray = @import("./ray.zig");
 const Ray = ray.Ray;
@@ -45,11 +44,4 @@ const Self = @This();
 pub fn getRay(u: f32, v: f32) Ray {
     // TODO check why subtract origin?
     return Ray.new(origin, lower_left_corner + mul(u, horizontal) + mul(v, vertical) - origin);
-}
-
-// utilities for camera ============================
-
-inline fn random_double_bounded(min: f32, max: f32) f32 {
-    // returns a random real in [min,max)
-    return min + (max - min) * rand.float(32);
 }

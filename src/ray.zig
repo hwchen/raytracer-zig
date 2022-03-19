@@ -8,6 +8,7 @@ pub const Ray = struct {
 
     const Self = @This();
 
+    // TODO to be consistent with vec3, initializer could be `ray`
     pub fn new(origin: Point3, direction: Vec3) Self {
         return Self{
             .origin = origin,
