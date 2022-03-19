@@ -7,13 +7,9 @@ pub fn build(b: *std.build.Builder) void {
     // for restricting supported target set are available.
     const target = b.standardTargetOptions(.{});
 
-    // Standard release options allow the person running `zig build` to select
-    // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
-    const mode = b.standardReleaseOptions();
-
     const exe = b.addExecutable("raytracer", "src/main.zig");
     exe.setTarget(target);
-    exe.setBuildMode(mode);
+    exe.setBuildMode(.ReleaseFast);
     exe.addIncludeDir("/usr/include");
     exe.linkSystemLibrary("SDL2");
     exe.linkLibC();
@@ -30,7 +26,7 @@ pub fn build(b: *std.build.Builder) void {
 
     const exe_tests = b.addTest("src/main.zig");
     exe_tests.setTarget(target);
-    exe_tests.setBuildMode(mode);
+    exe_tests.setBuildMode(.Debug);
     exe_tests.addIncludeDir("/usr/include");
     exe_tests.linkSystemLibrary("SDL2");
     exe_tests.linkLibC();
