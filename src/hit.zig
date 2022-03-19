@@ -12,10 +12,12 @@ const point3 = point.point3;
 const Point3 = point.Point3;
 const ray = @import("./ray.zig");
 const Ray = ray.Ray;
+const Material = @import("./material.zig").Material;
 
 pub const HitRecord = struct {
     p: Point3,
     normal: Vec3,
+    material: Material,
     t: f32,
     front_face: bool,
 
@@ -40,6 +42,7 @@ pub const Hittable = union(enum) {
 pub const Sphere = struct {
     center: Point3,
     radius: f32,
+    material: Material,
 
     const Self = @This();
 
@@ -72,6 +75,7 @@ pub const Sphere = struct {
                 // todo maybe set a constructor for HitRecord
                 .normal = undefined,
                 .front_face = undefined,
+                .material = self.material,
             };
 
             hit_record.setFaceNormal(r, outward_normal);

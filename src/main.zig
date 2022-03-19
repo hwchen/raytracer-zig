@@ -66,10 +66,12 @@ pub fn main() !void {
     try world.add(Hittable{ .sphere = .{
         .center = point3(0.0, 0.0, -1.0),
         .radius = 0.5,
+        .material = .lambertian,
     } });
     try world.add(Hittable{ .sphere = .{
         .center = point3(0.0, -100.5, -1.0),
         .radius = 100,
+        .material = .lambertian,
     } });
 
     // render
