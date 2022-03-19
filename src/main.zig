@@ -136,7 +136,7 @@ fn rayColor(r: Ray, world: World, depth: usize) Color {
         return color(0.0, 0.0, 0.0);
     }
 
-    if (world.hit(r, 0.0, std.math.inf(f32))) |rec| {
+    if (world.hit(r, 0.001, std.math.inf(f32))) |rec| {
         const target = rec.p + rec.normal + randomInUnitSphere();
         return mul(@as(f32, 0.5), rayColor(Ray.new(rec.p, target - rec.p), world, depth - 1));
     } else {
